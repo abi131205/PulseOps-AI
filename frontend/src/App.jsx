@@ -139,7 +139,7 @@ export default function App() {
 
   // Process data for charts
   const occupancyChartData = benchmarkData?.data?.bed_occupancy?.map((log) => ({
-    time: log.timestamp ? log.timestamp.split(' ')[1] : '',
+    time: log.timestamp ? log.timestamp.split(/[T ]/)[1] : '',
     'ICU Beds Occupied': log.icu_beds_occupied,
     'ER Beds Occupied': log.er_beds_occupied,
   })) || [];
