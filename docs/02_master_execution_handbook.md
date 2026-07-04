@@ -21,17 +21,17 @@ This document outlines the strategic project management execution plan, timeline
 
 ```mermaid
 graph TD
-    M1[Member 1: Team Lead<br>BME & AI] -->|Gemini API, Prompts, Pitch| Deliverable1(Prompt Schemas, Video Demo)
-    M2[Member 2: CS Graduate<br>AI & ML] -->|NVIDIA RAPIDS, cuDF, Data Gen| Deliverable2(generate_data.py, pipeline.py)
-    M3[Member 3: CS Graduate<br>Backend & DevOps] -->|FastAPI, Docker, GCP Cloud Run| Deliverable3(main.py, Dockerfile, deploy.sh)
-    M4[Member 4: 2nd Year CSE<br>Frontend & CSS] -->|React, Tailwind, Recharts| Deliverable4(App.jsx, index.css)
+    M1[Member 1: User<br>BME & AI Lead] -->|Clinical Operations, Validation Layer, Pitch| Deliverable1(Validation Engine, Pitch Deck)
+    M2[Member 2: MSc CS<br>AI & ML Engineer] -->|NVIDIA cuDF, Data Gen, Benchmark| Deliverable2(generate_data.py, pipeline.py)
+    M3[Member 3: CS Graduate<br>Systems Architect] -->|FastAPI routers, Docker builds, Cloud Run| Deliverable3(main.py, Dockerfile, deploy.sh)
+    M4[Member 4: 2nd Year CSE<br>UI & Debugging] -->|Tailwind styles, Responsive UI, QA testing| Deliverable4(App.jsx, Test Cases)
 ```
 
 ### Team Responsibilities & Capability Matrix:
-* **Member 1 (Lead):** Project Coordinator. Responsible for Gemini prompts, validation schema designs, submission presentation slide deck, and clinical compliance checks.
-* **Member 2 (ML/Data):** Data Engineer. Responsible for the configurable multi-scale synthetic dataset generator and the cuDF analytics pipeline.
-* **Member 3 (Backend/DevOps):** Systems Engineer. Responsible for FastAPI routers, multi-stage Dockerfile packaging, local virtualenv settings, and GCP Cloud Run setup.
-* **Member 4 (Frontend):** UI Developer. Responsible for React page components, Tailwind CSS styling, and Recharts integration.
+* **Member 1 (Lead / User):** BTech CSE (Medical Engineering specialized in AI & DA). Owns the core business/operations logic, clinical-to-logistical compliance checking, **Recommendation Validation Layer** rules, prompt framing, and final presentation slide deck.
+* **Member 2 (AI/ML Engineer):** Integrated M.Sc. in CS (AI & ML). Owns the **NVIDIA RAPIDS cuDF pipeline**, multi-scale dataset generator metrics, data modeling, and GPU-to-CPU timing math.
+* **Member 3 (Systems Architect):** CS Graduate. Owns the FastAPI application routing, **Google Cloud Run** containerization configurations, multi-stage Docker build files, and local `.venv` settings.
+* **Member 4 (UI Developer & Debugger):** 2nd Year CSE. Owns the Tailwind CSS styling, responsive layout tweaks, Recharts binding adjustments, and dashboard **QA/debugging checks**.
 
 ---
 
