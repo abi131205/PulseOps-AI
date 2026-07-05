@@ -11,10 +11,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for local React development server (Vite defaults to port 5173)
+# FIX (Bug #3): allow_origins=["*"] combined with allow_credentials=True is an
+# invalid/insecure combination (browsers will reject credentialed requests
+# against a wildcard origin, and it's bad practice for a prod deployment
+# behind Cloud Run). Origins are now read from CORS_ALLOWED_ORIGINS
+# (comma-separated), defaulting to local dev + "*" fallback only if unset.
+cors_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "")
+if cors_origins_env and cors_origins_env != "*":
+    allowed_origins = [origin.strip() for origin in cors_origins_env.split(",")]
+else:
+    # Local dev defaults (Vite) — replace/extend with your Cloud Run frontend
+    # domain via the CORS_ALLOWED_ORIGINS env var at deploy time.
+    allowed_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,11 +56,11 @@ async def get_command_center():
         occupancy = load_data_source("bed_occupancy_logs", use_gpu=False).to_dict(orient="records")
         incidents = load_data_source("emergency_incident_log", use_gpu=False).to_dict(orient="records")
         telemetry = load_data_source("equipment_telemetry", use_gpu=False).to_dict(orient="records")
-        
+
         latest_occ = occupancy[-1] if occupancy else {}
         active_inc = [inc for inc in incidents if inc.get("status") == "In-Progress"]
         critical_alerts = [t for t in telemetry if t.get("alarm_status") == 2]
-        
+
         return {
             "status": "active",
             "icu_occupied": latest_occ.get("icu_beds_occupied", 30),
@@ -72,16 +84,16 @@ async def get_recommendations():
         telemetry = load_data_source("equipment_telemetry", use_gpu=False).to_dict(orient="records")
         maintenance = load_data_source("maintenance_records", use_gpu=False).to_dict(orient="records")
         occupancy = load_data_source("bed_occupancy_logs", use_gpu=False).to_dict(orient="records")
-        
+
         raw_recs = generate_operational_recommendations(telemetry, maintenance, occupancy)
-        
+
         # Attach Gemini natural-language explanations
         final_recs = []
         for rec in raw_recs:
             briefing = generate_recommendation_briefing(rec)
             rec["gemini_explanation"] = briefing
             final_recs.append(rec)
-            
+
         return final_recs
     except Exception as e:
         return {"status": "error", "message": f"Failed to compile recommendations: {e}"}
@@ -105,11 +117,26 @@ async def get_equipment():
     try:
         telemetry = load_data_source("equipment_telemetry", use_gpu=False).to_dict(orient="records")
         maintenance = load_data_source("maintenance_records", use_gpu=False).to_dict(orient="records")
-        
+
         scored_equipment = compute_all_ops(telemetry, maintenance)
         return scored_equipment
     except Exception as e:
         return []
+
+# ---------------------------------------------------------------------------
+# EXTENSION POINT (Kamal): Add new "minor indicator" routes below this line,
+# once the team confirms which indicators to add. Keep response shapes
+# consistent with the routes above so Krithika's charts don't need special
+# casing. Example pattern:
+#
+# @app.get("/api/indicators/{indicator_name}")
+# async def get_indicator(indicator_name: str):
+#     try:
+#         data = load_data_source(indicator_name, use_gpu=False).to_dict(orient="records")
+#         return {"indicator": indicator_name, "data": data}
+#     except Exception as e:
+#         return {"status": "error", "message": f"Failed to load indicator '{indicator_name}': {e}"}
+# ---------------------------------------------------------------------------
 
 # Serve React static assets in production
 frontend_dist_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/dist"))
