@@ -511,8 +511,30 @@ export default function App() {
                             <td className="p-4 font-bold text-white">{eq.equipment_id}</td>
                             <td className="p-4">{eq.name}</td>
                             <td className="p-4">{eq.department}</td>
-                            <td className="p-4">{intToPercent(eq.utilization_rate)}</td>
-                            <td className="p-4">{eq.temperature}°C</td>
+                            <td className="p-4">
+  <div className="w-24 bg-slate-700 rounded-full h-2">
+    <div
+      className="bg-cyan-400 h-2 rounded-full"
+      style={{ width: `${eq.utilization_rate * 100}%` }}
+    ></div>
+  </div>
+  <span className="text-[10px] mt-1 block text-slate-300">
+    {intToPercent(eq.utilization_rate)}
+  </span>
+</td>
+                           <td className="p-4">
+  <span
+    className={`font-semibold ${
+      eq.temperature > 50
+        ? "text-red-400"
+        : eq.temperature > 40
+        ? "text-orange-400"
+        : "text-green-400"
+    }`}
+  >
+    {eq.temperature}°C
+  </span>
+</td>
                             <td className="p-4">{eq.days_since_last_service} days ago</td>
                             <td className="p-4">
                               <span className={`px-2 py-0.5 rounded font-bold ${
