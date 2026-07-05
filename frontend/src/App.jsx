@@ -169,71 +169,119 @@ export default function App() {
           </div>
 
           {/* Navigation Items */}
-          <nav className="p-4 space-y-1.5">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium transition-all ${
-                    isActive 
-                      ? 'bg-accentBlue/10 text-accentBlue border border-accentBlue/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]' 
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
-                  }`}
-                >
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-accentBlue' : 'text-slate-400'}`} />
-                  {item.name}
-                </button>
-              );
-            })}
-          </nav>
+<nav className="p-4 space-y-2">
+  {navigation.map((item) => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => setActiveTab(item.id)}
+        className={`group w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out ${
+          isActive
+            ? "bg-gradient-to-r from-blue-600/20 to-cyan-500/20 border border-cyan-400/30 text-white shadow-lg"
+            : "text-slate-400 hover:bg-slate-800/60 hover:text-white hover:border-slate-700 border border-transparent hover:translate-x-1"
+        }`}
+      >
+        <div
+          className={`flex items-center justify-center h-9 w-9 rounded-lg transition-all duration-300 ${
+            isActive
+              ? "bg-cyan-500/20 text-cyan-300"
+              : "bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-white"
+          }`}
+        >
+          <Icon className="h-5 w-5" />
         </div>
 
-        {/* System Settings & Status in Sidebar footer */}
-        <div className="p-4 border-t border-borderLight bg-slate-900/40 space-y-3">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-slate-400">System Status:</span>
-            <div className="flex items-center gap-1.5 text-accentGreen">
-              <span className="h-1.5 w-1.5 rounded-full bg-accentGreen pulsing-indicator"></span>
-              <span className="font-semibold uppercase tracking-wider">Active</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-slate-400">Data Profile:</span>
-            <select 
-              value={dataProfile} 
-              onChange={(e) => handleProfileChange(e.target.value)}
-              className="bg-cardBg border border-borderLight rounded px-2 py-0.5 text-[10px] text-white focus:outline-none focus:border-accentBlue"
-            >
-              <option value="SMALL">Small (10k)</option>
-              <option value="MEDIUM">Medium (250k)</option>
-              <option value="LARGE">Large (1M+)</option>
-            </select>
-          </div>
+        <span className="flex-1 text-left">
+          {item.name}
+        </span>
+
+        {isActive && (
+          <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.9)]"></div>
+        )}
+      </button>
+    );
+  })}
+</nav>
         </div>
+{/* System Settings & Status in Sidebar footer */}
+<div className="p-5 border-t border-slate-700 bg-gradient-to-b from-slate-900/70 to-slate-950 space-y-4">
+
+  {/* System Status */}
+  <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
+    <div className="flex items-center justify-between">
+      <span className="text-xs font-medium text-slate-400">
+        System Status
+      </span>
+
+      <div className="flex items-center gap-2 text-emerald-400">
+        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span className="text-xs font-semibold uppercase tracking-wider">
+          Active
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {/* Data Profile */}
+  <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
+    <label className="block text-xs font-medium text-slate-400 mb-2">
+      Data Profile
+    </label>
+
+    <select
+      value={dataProfile}
+      onChange={(e) => handleProfileChange(e.target.value)}
+      className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
+    >
+      <option value="SMALL">🟢 Small (10k)</option>
+      <option value="MEDIUM">🟡 Medium (250k)</option>
+      <option value="LARGE">🔴 Large (1M+)</option>
+    </select>
+  </div>
+
+</div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 border-b border-borderLight flex items-center justify-between px-8 bg-cardBg/40 backdrop-blur-sm z-10">
-          <h2 className="text-sm font-semibold text-white tracking-wide uppercase">
-            {navigation.find(item => item.id === activeTab)?.name}
-          </h2>
-          
-          <div className="flex items-center gap-4">
-            {loading && <RefreshCw className="h-4 w-4 animate-spin text-accentBlue" />}
-            <div className="flex items-center gap-2 bg-slate-900/60 border border-borderLight rounded-full px-3.5 py-1 text-xs">
-              <span className="text-slate-400">Warehouse Connector:</span>
-              <span className="text-accentGreen font-medium flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3 text-accentGreen" />
-                BigQuery Connected
-              </span>
-            </div>
-          </div>
-        </header>
+<header className="h-20 border-b border-slate-700 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-md px-8 flex items-center justify-between shadow-md">
+
+  {/* Left Section */}
+  <div>
+    <h2 className="text-xl font-bold text-white">
+      {navigation.find(item => item.id === activeTab)?.name}
+    </h2>
+    <p className="text-xs text-slate-400 mt-1">
+      AI-Powered Hospital Operations Dashboard
+    </p>
+  </div>
+
+  {/* Right Section */}
+  <div className="flex items-center gap-4">
+
+    {loading && (
+      <RefreshCw className="h-5 w-5 animate-spin text-cyan-400" />
+    )}
+
+    <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2">
+      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+      <div className="flex flex-col leading-none">
+        <span className="text-[10px] uppercase tracking-widest text-slate-400">
+          Warehouse
+        </span>
+        <span className="text-sm font-semibold text-emerald-300">
+          BigQuery Connected
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+</header>
 
         {/* Dynamic Viewport */}
         <div className="flex-1 overflow-y-auto p-8 relative">
