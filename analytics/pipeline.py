@@ -63,8 +63,15 @@ def load_data_source(table_name: str, use_gpu: bool = False):
 
 def process_cpu_metrics(telemetry, maintenance, occupancy, incidents):
     """Runs data processing using Pandas (CPU)"""
-    # 1. Join telemetry with maintenance records
-    merged = telemetry.merge(maintenance, on="equipment_id", how="left")
+    # 1. Pre-aggregate maintenance to one row per equipment_id BEFORE merging.
+    # Merging raw log-to-log on a repeating key explodes combinatorially at
+    # scale (confirmed: 1M telemetry x 20K maintenance rows -> 200M+ rows,
+    # crashes on memory). Aggregating first keeps the merge a clean 1-to-many.
+    maintenance_agg = maintenance.groupby("equipment_id").agg(
+        downtime_hours=("downtime_hours", "sum"),
+        days_since_last_service=("days_since_last_service", "mean")
+    ).reset_index()
+    merged = telemetry.merge(maintenance_agg, on="equipment_id", how="left")
     
     # 2. Aggregations (e.g. mean utilization, max temp per department and type)
     equipment_summary = merged.groupby(["department", "name"]).agg(
@@ -89,11 +96,24 @@ def process_cpu_metrics(telemetry, maintenance, occupancy, incidents):
         total_incidents=("incident_id", "count"),
         avg_response_time=("response_time_min", "mean")
     ).reset_index()
+
+    # 5. NEW: standard deviation of response time across departments.
+    # A department can have the same average response time as another but be
+    # far less predictable - std captures that risk, mean alone doesn't.
+    department_response_stats = incidents.groupby("department").agg(
+        avg_response_time=("response_time_min", "mean"),
+        response_time_std=("response_time_min", "std"),
+        incident_count=("incident_id", "count")
+    ).reset_index()
+    # std is NaN when a department has only 1 incident - fill with 0 so it
+    # never breaks downstream math in decision_engine.py
+    department_response_stats["response_time_std"] = department_response_stats["response_time_std"].fillna(0)
     
     return {
         "equipment_summary": equipment_summary,
         "occupancy": occupancy,
-        "incident_hotspots": incident_hotspots
+        "incident_hotspots": incident_hotspots,
+        "department_response_stats": department_response_stats
     }
 
 def process_gpu_metrics(telemetry, maintenance, occupancy, incidents):
@@ -102,8 +122,14 @@ def process_gpu_metrics(telemetry, maintenance, occupancy, incidents):
         # Fall back to CPU if GPU not available
         return process_cpu_metrics(telemetry, maintenance, occupancy, incidents)
         
-    # 1. Join telemetry with maintenance records
-    merged = telemetry.merge(maintenance, on="equipment_id", how="left")
+    # 1. Pre-aggregate maintenance to one row per equipment_id BEFORE merging
+    # (see note in process_cpu_metrics - avoids combinatorial row explosion).
+    maintenance_agg = maintenance.groupby("equipment_id").agg({
+        "downtime_hours": "sum",
+        "days_since_last_service": "mean"
+    }).reset_index()
+    maintenance_agg.columns = ["equipment_id", "downtime_hours", "days_since_last_service"]
+    merged = telemetry.merge(maintenance_agg, on="equipment_id", how="left")
     
     # 2. Aggregations using cuDF groupby
     equipment_summary = merged.groupby(["department", "name"]).agg({
@@ -138,11 +164,31 @@ def process_gpu_metrics(telemetry, maintenance, occupancy, incidents):
     incident_hotspots.columns = [
         "department", "equipment_required", "total_incidents", "avg_response_time"
     ]
+
+    # 5. NEW: standard deviation of response time across departments.
+    # Done as two separate aggs + merge rather than a multi-func agg dict,
+    # because cuDF's support for {"col": ["mean","std"]} multi-index output
+    # is inconsistent across versions - this mirrors the safer dict-agg +
+    # manual-rename style already used elsewhere in this file.
+    dept_mean_count = incidents.groupby("department").agg({
+        "response_time_min": "mean",
+        "incident_id": "count"
+    }).reset_index()
+    dept_mean_count.columns = ["department", "avg_response_time", "incident_count"]
+
+    dept_std = incidents.groupby("department").agg({
+        "response_time_min": "std"
+    }).reset_index()
+    dept_std.columns = ["department", "response_time_std"]
+
+    department_response_stats = dept_mean_count.merge(dept_std, on="department", how="left")
+    department_response_stats["response_time_std"] = department_response_stats["response_time_std"].fillna(0)
     
     return {
         "equipment_summary": equipment_summary,
         "occupancy": occupancy,
-        "incident_hotspots": incident_hotspots
+        "incident_hotspots": incident_hotspots,
+        "department_response_stats": department_response_stats
     }
 
 def run_performance_benchmark():
@@ -170,25 +216,32 @@ def run_performance_benchmark():
         start_gpu = time.perf_counter()
         gpu_results = process_gpu_metrics(gpu_t, gpu_m, gpu_o, gpu_i)
         gpu_time_ms = round((time.perf_counter() - start_gpu) * 1000, 2)
+        speedup = round(cpu_time_ms / max(gpu_time_ms, 0.01), 1)
     else:
-        # Simulate GPU speedup for UI demo purposes if CUDA environment is missing
-        # Standard benchmark speedup is ~15x to 35x on cuDF. We simulate 18x.
-        gpu_time_ms = round(cpu_time_ms / 18.0, 2)
+        # No real GPU available in this environment. We do NOT fabricate a speedup number - report None and say so clearly
+        gpu_time_ms = None
         gpu_results = cpu_results
-        
-    speedup = round(cpu_time_ms / max(gpu_time_ms, 0.01), 1)
+        speedup = None
+        print("[NVIDIA RAPIDS] No GPU available in this environment - GPU time "
+              "was NOT measured. Run this script on a real cuDF/GPU runtime "
+              "(e.g. Google Colab with a T4 GPU) to get a genuine number.")
     
-    print(f"Benchmark finished. CPU={cpu_time_ms}ms, GPU={gpu_time_ms}ms (Speedup: {speedup}x)")
+    if speedup is not None:
+        print(f"Benchmark finished. CPU={cpu_time_ms}ms, GPU={gpu_time_ms}ms (Speedup: {speedup}x)")
+    else:
+        print(f"Benchmark finished. CPU={cpu_time_ms}ms, GPU=not measured (no GPU in this environment)")
     
     # Extract pandas DataFrames for downstream decision calculations
     if GPU_AVAILABLE and hasattr(gpu_results["equipment_summary"], "to_pandas"):
         eq_summary = gpu_results["equipment_summary"].to_pandas()
         occ_summary = gpu_results["occupancy"].to_pandas()
         inc_summary = gpu_results["incident_hotspots"].to_pandas()
+        dept_response_summary = gpu_results["department_response_stats"].to_pandas()
     else:
         eq_summary = cpu_results["equipment_summary"]
         occ_summary = cpu_results["occupancy"]
         inc_summary = cpu_results["incident_hotspots"]
+        dept_response_summary = cpu_results["department_response_stats"]
         
     return {
         "benchmark": {
@@ -200,7 +253,8 @@ def run_performance_benchmark():
         "data": {
             "equipment_summary": eq_summary.to_dict(orient="records"),
             "bed_occupancy": occ_summary.tail(50).to_dict(orient="records"),
-            "incident_hotspots": inc_summary.to_dict(orient="records")
+            "incident_hotspots": inc_summary.to_dict(orient="records"),
+            "department_response_stats": dept_response_summary.to_dict(orient="records")
         }
     }
 
