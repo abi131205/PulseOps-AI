@@ -308,8 +308,22 @@ export default function App() {
                 {/* Graph & Incident log */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Occupancy Trend chart */}
-                  <div className="glass-panel rounded-xl p-6 lg:col-span-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-4">Bed Utilization Time-Series Trend</h3>
+                  <div className="glass-panel rounded-2xl p-6 lg:col-span-2 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-5">
+  <div>
+    <h3 className="text-sm font-bold text-white">
+      Bed Utilization Trend
+    </h3>
+    <p className="text-xs text-slate-400 mt-1">
+      Real-time ICU & ER occupancy analysis
+    </p>
+  </div>
+
+  <div className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px] font-semibold uppercase tracking-wider">
+    Live
+  </div>
+</div>
+                    
                     <div className="h-72 w-full">
                       {occupancyChartData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
@@ -324,25 +338,41 @@ export default function App() {
                           </LineChart>
                         </ResponsiveContainer>
                       ) : (
-                        <div className="h-full flex items-center justify-center text-xs text-textMuted">Loading time-series data...</div>
+                        <div className="h-full flex items-center justify-center text-sm text-slate-400 font-medium">Loading time-series data...</div>
                       )}
                     </div>
                   </div>
 
                   {/* Active Incident logs */}
-                  <div className="glass-panel rounded-xl p-6 flex flex-col justify-between">
+                  <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
                     <div>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-4">Active Operational Incidents</h3>
+                      <div className="flex items-center justify-between mb-5">
+  <div>
+    <h3 className="text-sm font-bold text-white">
+      Active Incidents
+    </h3>
+    <p className="text-xs text-slate-400 mt-1">
+      Live operational alerts
+    </p>
+  </div>
+
+  <span className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-[10px] font-semibold uppercase">
+    Live
+  </span>
+</div>
+                      
                       <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
                         {commandCenterData.active_incidents.length > 0 ? (
                           commandCenterData.active_incidents.map((inc) => (
-                            <div key={inc.incident_id} className="border border-borderLight bg-slate-900/40 rounded-lg p-3 text-xs space-y-1">
+                            <div key={inc.incident_id} className="border border-slate-700 bg-slate-900/60 rounded-xl p-4 text-xs space-y-2 hover:border-cyan-500/40 hover:bg-slate-800/80 transition-all duration-300">
                               <div className="flex justify-between items-center">
                                 <span className="font-semibold text-white">{inc.incident_id}</span>
                                 <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                                  inc.severity === 'Critical' ? 'bg-accentRed/10 text-accentRed' :
-                                  inc.severity === 'High' ? 'bg-accentOrange/10 text-accentOrange' :
-                                  'bg-accentBlue/10 text-accentBlue'
+                                  inc.severity === 'Critical'
+? 'bg-red-500/15 text-red-300 border border-red-500/30'
+: inc.severity === 'High'
+? 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
+: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
                                 }`}>
                                   {inc.severity}
                                 </span>
@@ -356,7 +386,7 @@ export default function App() {
                             </div>
                           ))
                         ) : (
-                          <div className="text-xs text-textMuted py-8 text-center">No active operational incidents logged.</div>
+                          <div className="text-sm text-slate-400 py-10 text-center">No active operational incidents logged.</div>
                         )}
                       </div>
                     </div>
