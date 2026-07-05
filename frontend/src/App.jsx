@@ -250,14 +250,14 @@ export default function App() {
               <div className="space-y-6">
                 {/* Stats Summary Row */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="glass-panel rounded-xl p-5">
-                    <span className="text-[10px] text-textMuted uppercase font-semibold">ICU Bed Pressure</span>
-                    <div className="text-2xl font-bold mt-1 text-white">
+                  <div className="glass-panel rounded-2xl p-6 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300">
+                    <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">ICU Bed Pressure</span>
+                    <div className="text-3xl font-extrabold mt-2 text-white">
                       {commandCenterData.icu_occupied} / {commandCenterData.icu_total}
                     </div>
-                    <div className="w-full bg-slate-800 rounded-full h-1.5 mt-3">
+                    <div className="w-full bg-slate-700 rounded-full h-2 mt-4 overflow-hidden">
                       <div 
-                        className="bg-accentBlue h-1.5 rounded-full" 
+                        className="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full transition-all duration-700" 
                         style={{ width: `${(commandCenterData.icu_occupied / commandCenterData.icu_total) * 100}%` }}
                       ></div>
                     </div>
@@ -266,14 +266,14 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-xl p-5">
-                    <span className="text-[10px] text-textMuted uppercase font-semibold">Emergency Room Load</span>
-                    <div className="text-2xl font-bold mt-1 text-white">
+                  <div className="glass-panel rounded-2xl p-6 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300">
+                    <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Emergency Room Load</span>
+                    <div className="text-3xl font-extrabold mt-2 text-white">
                       {commandCenterData.er_occupied} / {commandCenterData.er_total}
                     </div>
-                    <div className="w-full bg-slate-800 rounded-full h-1.5 mt-3">
+                    <div className="w-full bg-slate-700 rounded-full h-2 mt-4 overflow-hidden">
                       <div 
-                        className="bg-accentOrange h-1.5 rounded-full" 
+                        className="bg-gradient-to-r from-orange-400 to-red-500 h-2 rounded-full transition-all duration-700" 
                         style={{ width: `${(commandCenterData.er_occupied / commandCenterData.er_total) * 100}%` }}
                       ></div>
                     </div>
@@ -282,9 +282,9 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-xl p-5">
-                    <span className="text-[10px] text-textMuted uppercase font-semibold">ER Waiting Queue</span>
-                    <div className="text-2xl font-bold mt-1 text-accentRed">
+                  <div className="glass-panel rounded-2xl p-6 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300">
+                    <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">ER Waiting Queue</span>
+                    <div className="text-3xl font-extrabold mt-2 text-accentRed">
                       {commandCenterData.er_queue_length} patients
                     </div>
                     <div className="flex items-center gap-1.5 text-[10px] text-textMuted mt-4">
@@ -293,9 +293,9 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-xl p-5">
-                    <span className="text-[10px] text-textMuted uppercase font-semibold">Active Logistics Incidents</span>
-                    <div className="text-2xl font-bold mt-1 text-accentOrange">
+                  <div className="glass-panel rounded-2xl p-6 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300">
+                    <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Active Logistics Incidents</span>
+                    <div className="text-3xl font-extrabold mt-2 text-accentOrange">
                       {commandCenterData.active_incidents_count} active
                     </div>
                     <div className="flex items-center gap-1.5 text-[10px] text-textMuted mt-4">
