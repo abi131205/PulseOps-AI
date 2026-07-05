@@ -560,11 +560,16 @@ export default function App() {
 
             {/* 4. System Performance View */}
             {activeTab === 'performance' && (
-              <div className="glass-panel rounded-xl p-6">
+              <div className="glass-panel rounded-2xl p-6 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">NVIDIA RAPIDS GPU Acceleration Benchmark</h3>
-                    <p className="text-[11px] text-textMuted mt-1">Compares parallel processing speeds of GPU cuDF and CPU Pandas executing hospital operations metrics rollups.</p>
+                    <h3 className="text-lg font-bold text-white">
+  NVIDIA RAPIDS Benchmark
+</h3>
+
+<p className="text-sm text-slate-400 mt-1">
+  CPU vs GPU performance comparison for hospital analytics.
+</p>
                   </div>
                   <button 
                     onClick={triggerBenchmark}
@@ -577,7 +582,7 @@ export default function App() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Benchmarking statistics */}
-                  <div className="border border-borderLight rounded-xl p-6 bg-slate-950/40 col-span-1 space-y-6">
+                  <div className="rounded-2xl p-6 border border-slate-700/50 bg-gradient-to-br from-slate-900 to-slate-800 shadow-xl space-y-6">
                     <div>
                       <span className="text-[10px] text-textMuted uppercase font-semibold">Test Data Profile</span>
                       <div className="text-xl font-bold mt-1 text-white">{dataProfile} SCALE</div>
@@ -613,8 +618,21 @@ export default function App() {
                   </div>
 
                   {/* Benchmark charts comparison */}
-                  <div className="glass-panel rounded-xl p-6 lg:col-span-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-4">Pipeline Execution Times (Milliseconds)</h3>
+                  <div className="glass-panel rounded-2xl p-6 lg:col-span-2 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-green-500/10 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-5">
+  <div>
+    <h3 className="text-sm font-bold text-white">
+      Pipeline Execution Time
+    </h3>
+    <p className="text-xs text-slate-400 mt-1">
+      CPU vs GPU benchmark comparison
+    </p>
+  </div>
+
+  <span className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-300 text-[10px] font-semibold uppercase">
+    Live
+  </span>
+</div>
                     <div className="h-72 w-full">
                       {benchmarkData.benchmark.cpu_time_ms > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
