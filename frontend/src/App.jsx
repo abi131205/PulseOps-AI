@@ -158,13 +158,13 @@ export default function App() {
       <aside className="w-64 bg-cardBg border-r border-borderLight flex flex-col justify-between">
         <div>
           {/* Logo Header */}
-          <div className="h-16 flex items-center px-6 border-b border-borderLight gap-3">
-            <div className="h-8 w-8 rounded-lg bg-accentBlue flex items-center justify-center font-bold text-white shadow-[0_0_12px_rgba(41,121,255,0.4)]">
+          <div className="h-16 flex items-center px-6 border-b border-slate-700 gap-3 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center font-bold text-white shadow-lg">
               P
             </div>
             <div>
-              <h1 className="font-semibold text-sm leading-tight text-white">PulseOps AI</h1>
-              <span className="text-[10px] text-accentBlue font-medium tracking-wider uppercase">Decision Intelligence</span>
+              <h1 className="font-bold text-base leading-tight text-white">PulseOps AI</h1>
+              <span className="text-[11px] text-cyan-300 font-semibold tracking-widest uppercase">Decision Intelligence</span>
             </div>
           </div>
 
