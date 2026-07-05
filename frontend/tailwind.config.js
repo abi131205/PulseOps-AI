@@ -7,14 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        darkBg: "#0B0F19",       // Premium dark navy background
-        cardBg: "#151C2C",       // Deep glassmorphic slate cards
-        borderLight: "#222D44",   // Subtle card borders
-        accentGreen: "#00E676",   // High-vis green for operational health
-        accentOrange: "#FF9100",  // Warn alert status
-        accentRed: "#FF5252",     // Critical alert status
-        accentBlue: "#2979FF",    // Active info indicators
-        textMuted: "#94A3B8"      // Cool gray text
+        darkBg: "#FAF7F2",       // Elegant warm white/cream background
+        cardBg: "#FFFFFF",       // Clean premium white cards
+        borderLight: "#E5DCD3",   // Soft warm taupe borders
+        accentBlue: "#B36A70",    // Dusty Rose primary accent
+        accentGreen: "#8C9A86",   // Muted sage green for operational health
+        accentOrange: "#C59A70",  // Muted warm gold for warnings
+        accentRed: "#9C5257",     // Deep rose for critical status
+        textMuted: "#A89F91"      // Warm Taupe secondary text
       },
       fontFamily: {
         sans: ["Outfit", "Inter", "sans-serif"]

@@ -35,7 +35,11 @@ def load_data_source(table_name: str, use_gpu: bool = False):
     project_id = os.getenv("GCP_PROJECT_ID")
     dataset_id = os.getenv("BIGQUERY_DATASET", "pulseops_ai")
     
-    if project_id:
+    # Prevent metadata lookup timeouts locally if credentials are not configured
+    has_credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS") is not None
+    is_cloud_run = os.getenv("K_SERVICE") is not None
+    
+    if project_id and (has_credentials or is_cloud_run):
         try:
             from google.cloud import bigquery
             from google.cloud import bigquery_storage

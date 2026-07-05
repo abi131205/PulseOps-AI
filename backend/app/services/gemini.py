@@ -28,11 +28,12 @@ def get_local_fallback_explanation(recommendation: dict) -> str:
     ops = recommendation.get("operational_priority_score", 50)
     reasoning = recommendation.get("reasoning", "")
     impact = recommendation.get("expected_impact", "")
+    alternative = recommendation.get("alternative", "using standby inventory")
     
     return (
-        f"OPERATIONAL BRIEFING: This action has been prioritized due to an Operational Priority Score of {ops}/100. "
-        f"{reasoning} Implementing this transfer is projected to result in: '{impact}' "
-        "Logistics coordinators should verify transit pathways and alert department leads immediately."
+        f"⚠️ JUSTIFICATION: This action has been prioritized due to a high Operational Priority Score of {ops}/100. {reasoning} "
+        f"📈 IMPACT: Implementing this transfer results in: {impact}. "
+        f"⚙️ ALTERNATIVE: The alternative option ({alternative}) does not satisfy urgent capacity needs."
     )
 
 def generate_recommendation_briefing(recommendation: dict) -> str:
@@ -61,11 +62,14 @@ def generate_recommendation_briefing(recommendation: dict) -> str:
         - Alternative Option: {recommendation.get('alternative')}
         
         INSTRUCTIONS:
-        1. Keep the briefing concise (3-4 sentences maximum).
+        1. Keep the briefing concise (3 sentences maximum).
         2. Focus strictly on logistical efficiency, resource allocation, and equipment health.
         3. Do NOT make clinical or medical recommendations. Focus entirely on hospital operations.
         4. Do NOT calculate or change any scores. Use the provided Operational Priority Score (OPS).
-        5. Explain why the alternative option is less optimal than the primary recommended action.
+        5. Format the briefing EXACTLY in the following structural layout:
+           ⚠️ JUSTIFICATION: [1 sentence explaining the critical need based on base reasoning factors]
+           📈 IMPACT: [1 sentence explaining the expected operational impact]
+           ⚙️ ALTERNATIVE: [1 sentence explaining why the alternative option is less optimal than the recommended action]
         """
         
         response = model.generate_content(prompt)

@@ -13,10 +13,13 @@ def validate_resource_reallocation(equipment_id: str, source_dept: str, dest_dep
     # Find equipment status
     m_lookup = {r["equipment_id"]: r for r in maintenance_data}
     
-    # 1. Check if device is in active service (downtime_hours > 0 in records)
+    # 1. Check if device is in active service or overdue for maintenance
     m_rec = m_lookup.get(equipment_id)
-    if m_rec and m_rec.get("downtime_hours", 0) > 0:
-        return False # Device is currently in maintenance; cannot be moved.
+    if m_rec:
+        if m_rec.get("downtime_hours", 0) > 0:
+            return False # Device is currently in maintenance; cannot be moved.
+        if m_rec.get("days_since_last_service", 0) > 300:
+            return False # Device is overdue for service; cannot be reallocated.
         
     # Look up last state in telemetry
     target_row = None
