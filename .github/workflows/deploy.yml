@@ -45,6 +45,65 @@ jobs:
       run: |
         pip install -r backend/requirements.txt
 
-    - name: Verify Backend Imports
+    # FIX (Bug #4): py_compile only checks syntax, not whether imports resolve.
+    # A broken/renamed import in pipeline.py, decision_engine.py, or gemini.py
+    # would pass the old check and only fail after deploy. This actually
+    # imports the FastAPI app object, which forces Python to resolve every
+    # import main.py depends on. Dummy env vars are provided so pydantic-settings
+    # doesn't fail on missing required config in a CI sandbox.
+    - name: Verify Backend Imports Resolve
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+        GEMINI_API_KEY: dummy-ci-key
+        GCP_PROJECT_ID: dummy-ci-project
+        DATASET_PROFILE: SMALL
       run: |
-        python -m py_compile backend/app/main.py
+        python -c "
+        import sys
+        sys.path.insert(0, '.')
+        from backend.app.main import app
+        print('Import check passed:', app.title)
+        "
+
+    - name: Run Test Suite
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+        GEMINI_API_KEY: dummy-ci-key
+        GCP_PROJECT_ID: dummy-ci-project
+        DATASET_PROFILE: SMALL
+      run: |
+        if [ -d "backend/tests" ] || [ -d "tests" ]; then
+          pytest -q
+        else
+          echo "No tests directory found yet — skipping pytest run."
+        fi
+
+  # New job: automated deploy to Cloud Run on merge to main.
+  # Requires a GCP_SA_KEY secret (service account JSON) configured under
+  # Settings -> Secrets and variables -> Actions.
+  deploy:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Run Deployment Script
+      env:
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        DATASET_PROFILE: ${{ vars.DATASET_PROFILE || 'SMALL' }}
+        CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+      run: |
+        chmod +x ./deploy.sh
+        ./deploy.sh
