@@ -404,26 +404,48 @@ export default function App() {
                         </div>
 
                         {/* Action Details */}
-                        <div className="lg:col-span-2 space-y-3">
-                          <div className="text-xs font-bold text-white text-base">
-                            {rec.action}
-                          </div>
-                          
-                          <div className="text-xs text-slate-300">
-                            <span className="font-semibold text-white">Reasoning:</span> {rec.reasoning}
-                          </div>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] pt-1">
-                            <div className="bg-accentGreen/5 border border-accentGreen/10 rounded p-2">
-                              <span className="font-semibold text-accentGreen uppercase text-[9px] tracking-wider block">Expected Impact</span>
-                              {rec.expected_impact}
-                            </div>
-                            <div className="bg-slate-800/20 border border-borderLight/50 rounded p-2">
-                              <span className="font-semibold text-slate-400 uppercase text-[9px] tracking-wider block">Alternative Option</span>
-                              {rec.alternative}
-                            </div>
-                          </div>
-                        </div>
+<div className="lg:col-span-2 space-y-4">
+  {/* Recommended Action */}
+  <div>
+    <span className="text-[10px] uppercase tracking-wider text-cyan-300 font-semibold">
+      Recommended Action
+    </span>
+    <h3 className="text-lg font-bold text-white mt-1 leading-snug">
+      {rec.action}
+    </h3>
+  </div>
+
+  {/* AI Reasoning */}
+  <div className="bg-slate-900/40 border border-slate-700 rounded-xl p-4">
+    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+      AI Reasoning
+    </span>
+    <p className="text-sm text-slate-300 mt-2 leading-relaxed">
+      {rec.reasoning}
+    </p>
+  </div>
+
+  {/* Impact & Alternative */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 hover:border-emerald-400 transition-all duration-300">
+      <span className="text-[10px] uppercase tracking-wider text-emerald-300 font-semibold block mb-2">
+        Expected Impact
+      </span>
+      <p className="text-sm text-white leading-relaxed">
+        {rec.expected_impact}
+      </p>
+    </div>
+
+    <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4 hover:border-cyan-400 transition-all duration-300">
+      <span className="text-[10px] uppercase tracking-wider text-cyan-300 font-semibold block mb-2">
+        Alternative Option
+      </span>
+      <p className="text-sm text-white leading-relaxed">
+        {rec.alternative}
+      </p>
+    </div>
+  </div>
+</div>
 
                         {/* Gemini Explanation Briefing */}
                         <div className="bg-accentBlue/5 border border-accentBlue/10 rounded-lg p-4 text-xs space-y-2 lg:col-span-1 self-stretch flex flex-col justify-between">
