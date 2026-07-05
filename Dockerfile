@@ -27,8 +27,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy compiled React static assets from Stage 1
-COPY --from=frontend-builder /frontend/dist /frontend/dist
+# FIX (Bug #1): Copy compiled React static assets into /app/frontend/dist
+# main.py resolves the path as "<main.py location>/../../frontend/dist" which,
+# once backend/app is copied into /app below, resolves to /app/frontend/dist.
+# The old path "COPY --from=frontend-builder /frontend/dist /frontend/dist"
+# copied to the container ROOT instead of /app, so the React build was never found.
+COPY --from=frontend-builder /frontend/dist ./frontend/dist
 
 # Copy backend application files
 COPY backend/app ./backend/app
@@ -37,15 +41,19 @@ COPY backend/app ./backend/app
 COPY analytics ./analytics
 COPY datasets ./datasets
 
+# FIX (Bug #2): Copy in the runtime entrypoint script instead of generating
+# data at build time. Data generation now happens on container START, so it
+# respects whatever DATASET_PROFILE is passed in via `--set-env-vars` at deploy
+# time (SMALL / MEDIUM / LARGE), instead of being permanently baked in as SMALL.
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
 # Set runtime configurations
 ENV PORT=8080
 ENV HOST=0.0.0.0
 ENV PYTHONPATH=/app
 ENV DATASET_PROFILE=SMALL
 
-# Run synthetic data generator on container boot to ensure files exist
-RUN python datasets/generate_data.py
-
-# Expose port and run server
+# Expose port and run server via entrypoint (generates data, then starts uvicorn)
 EXPOSE 8080
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+ENTRYPOINT ["./entrypoint.sh"]

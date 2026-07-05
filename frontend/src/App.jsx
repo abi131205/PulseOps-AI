@@ -306,6 +306,7 @@ export default function App() {
                 </div>
 
                 {/* Graph & Incident log */}
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Occupancy Trend chart */}
                   <div className="glass-panel rounded-2xl p-6 lg:col-span-2 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
@@ -395,6 +396,132 @@ export default function App() {
               </div>
             )}
 
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  {/* Occupancy Trend Chart */}
+  <div className="glass-panel rounded-2xl p-6 lg:col-span-2 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
+
+    <div className="flex items-center justify-between mb-5">
+      <div>
+        <h3 className="text-sm font-bold text-white">
+          Bed Utilization Trend
+        </h3>
+        <p className="text-xs text-slate-400 mt-1">
+          Real-time ICU & ER occupancy analysis
+        </p>
+      </div>
+
+      <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px] font-semibold uppercase tracking-wider">
+        Live
+      </span>
+    </div>
+
+    <div className="h-72 w-full">
+      {occupancyChartData.length > 0 ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={occupancyChartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#222D44" />
+            <XAxis dataKey="time" stroke="#94A3B8" fontSize={10} />
+            <YAxis stroke="#94A3B8" fontSize={10} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#151C2C",
+                border: "1px solid #222D44",
+              }}
+            />
+            <Legend fontSize={10} />
+            <Line
+              type="monotone"
+              dataKey="ICU Beds Occupied"
+              stroke="#38BDF8"
+              strokeWidth={3}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="ER Beds Occupied"
+              stroke="#FB923C"
+              strokeWidth={3}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="h-full flex items-center justify-center text-sm text-slate-400">
+          Loading time-series data...
+        </div>
+      )}
+    </div>
+  </div>
+
+  {/* Active Incident Logs */}
+  <div className="glass-panel rounded-2xl p-6 flex flex-col border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-red-500/10 transition-all duration-300">
+
+    <div className="flex items-center justify-between mb-5">
+      <div>
+        <h3 className="text-sm font-bold text-white">
+          Active Incidents
+        </h3>
+        <p className="text-xs text-slate-400 mt-1">
+          Live operational alerts
+        </p>
+      </div>
+
+      <span className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-[10px] font-semibold uppercase">
+        Live
+      </span>
+    </div>
+
+    <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+      {commandCenterData.active_incidents.length > 0 ? (
+        commandCenterData.active_incidents.map((inc) => (
+          <div
+            key={inc.incident_id}
+            className="border border-slate-700 bg-slate-900/60 rounded-xl p-4 hover:border-cyan-500/40 hover:bg-slate-800/80 transition-all duration-300"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-semibold text-white">
+                {inc.incident_id}
+              </span>
+
+              <span
+                className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+                  inc.severity === "Critical"
+                    ? "bg-red-500/15 text-red-300 border border-red-500/30"
+                    : inc.severity === "High"
+                    ? "bg-orange-500/15 text-orange-300 border border-orange-500/30"
+                    : "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
+                }`}
+              >
+                {inc.severity}
+              </span>
+            </div>
+
+            <p className="text-sm text-slate-300">
+              {inc.incident_type} in{" "}
+              <span className="font-semibold text-white">
+                {inc.department}
+              </span>
+            </p>
+
+            <p className="text-xs text-slate-500 mt-2">
+              Requires:
+              <span className="font-medium text-slate-300">
+                {" "}
+                {inc.equipment_required}
+              </span>
+            </p>
+          </div>
+        ))
+      ) : (
+        <div className="text-sm text-slate-400 text-center py-10">
+          No active operational incidents logged.
+        </div>
+      )}
+    </div>
+  </div>
+
+</div>
             {/* 2. Operational Priorities View */}
             {activeTab === 'priorities' && (
               <div className="glass-panel rounded-xl p-6">
@@ -434,26 +561,48 @@ export default function App() {
                         </div>
 
                         {/* Action Details */}
-                        <div className="lg:col-span-2 space-y-3">
-                          <div className="text-xs font-bold text-white text-base">
-                            {rec.action}
-                          </div>
-                          
-                          <div className="text-xs text-slate-300">
-                            <span className="font-semibold text-white">Reasoning:</span> {rec.reasoning}
-                          </div>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] pt-1">
-                            <div className="bg-accentGreen/5 border border-accentGreen/10 rounded p-2">
-                              <span className="font-semibold text-accentGreen uppercase text-[9px] tracking-wider block">Expected Impact</span>
-                              {rec.expected_impact}
-                            </div>
-                            <div className="bg-slate-800/20 border border-borderLight/50 rounded p-2">
-                              <span className="font-semibold text-slate-400 uppercase text-[9px] tracking-wider block">Alternative Option</span>
-                              {rec.alternative}
-                            </div>
-                          </div>
-                        </div>
+<div className="lg:col-span-2 space-y-4">
+  {/* Recommended Action */}
+  <div>
+    <span className="text-[10px] uppercase tracking-wider text-cyan-300 font-semibold">
+      Recommended Action
+    </span>
+    <h3 className="text-lg font-bold text-white mt-1 leading-snug">
+      {rec.action}
+    </h3>
+  </div>
+
+  {/* AI Reasoning */}
+  <div className="bg-slate-900/40 border border-slate-700 rounded-xl p-4">
+    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+      AI Reasoning
+    </span>
+    <p className="text-sm text-slate-300 mt-2 leading-relaxed">
+      {rec.reasoning}
+    </p>
+  </div>
+
+  {/* Impact & Alternative */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 hover:border-emerald-400 transition-all duration-300">
+      <span className="text-[10px] uppercase tracking-wider text-emerald-300 font-semibold block mb-2">
+        Expected Impact
+      </span>
+      <p className="text-sm text-white leading-relaxed">
+        {rec.expected_impact}
+      </p>
+    </div>
+
+    <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4 hover:border-cyan-400 transition-all duration-300">
+      <span className="text-[10px] uppercase tracking-wider text-cyan-300 font-semibold block mb-2">
+        Alternative Option
+      </span>
+      <p className="text-sm text-white leading-relaxed">
+        {rec.alternative}
+      </p>
+    </div>
+  </div>
+</div>
 
                         {/* Gemini Explanation Briefing */}
                         <div className="bg-accentBlue/5 border border-accentBlue/10 rounded-lg p-4 text-xs space-y-2 lg:col-span-1 self-stretch flex flex-col justify-between">
@@ -519,8 +668,30 @@ export default function App() {
                             <td className="p-4 font-bold text-white">{eq.equipment_id}</td>
                             <td className="p-4">{eq.name}</td>
                             <td className="p-4">{eq.department}</td>
-                            <td className="p-4">{intToPercent(eq.utilization_rate)}</td>
-                            <td className="p-4">{eq.temperature}°C</td>
+                            <td className="p-4">
+  <div className="w-24 bg-slate-700 rounded-full h-2">
+    <div
+      className="bg-cyan-400 h-2 rounded-full"
+      style={{ width: `${eq.utilization_rate * 100}%` }}
+    ></div>
+  </div>
+  <span className="text-[10px] mt-1 block text-slate-300">
+    {intToPercent(eq.utilization_rate)}
+  </span>
+</td>
+                           <td className="p-4">
+  <span
+    className={`font-semibold ${
+      eq.temperature > 50
+        ? "text-red-400"
+        : eq.temperature > 40
+        ? "text-orange-400"
+        : "text-green-400"
+    }`}
+  >
+    {eq.temperature}°C
+  </span>
+</td>
                             <td className="p-4">{eq.days_since_last_service} days ago</td>
                             <td className="p-4">
                               <span className={`px-2 py-0.5 rounded font-bold ${
@@ -546,11 +717,16 @@ export default function App() {
 
             {/* 4. System Performance View */}
             {activeTab === 'performance' && (
-              <div className="glass-panel rounded-xl p-6">
+              <div className="glass-panel rounded-2xl p-6 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">NVIDIA RAPIDS GPU Acceleration Benchmark</h3>
-                    <p className="text-[11px] text-textMuted mt-1">Compares parallel processing speeds of GPU cuDF and CPU Pandas executing hospital operations metrics rollups.</p>
+                    <h3 className="text-lg font-bold text-white">
+  NVIDIA RAPIDS Benchmark
+</h3>
+
+<p className="text-sm text-slate-400 mt-1">
+  CPU vs GPU performance comparison for hospital analytics.
+</p>
                   </div>
                   <button 
                     onClick={triggerBenchmark}
@@ -563,7 +739,7 @@ export default function App() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Benchmarking statistics */}
-                  <div className="border border-borderLight rounded-xl p-6 bg-slate-950/40 col-span-1 space-y-6">
+                  <div className="rounded-2xl p-6 border border-slate-700/50 bg-gradient-to-br from-slate-900 to-slate-800 shadow-xl space-y-6">
                     <div>
                       <span className="text-[10px] text-textMuted uppercase font-semibold">Test Data Profile</span>
                       <div className="text-xl font-bold mt-1 text-white">{dataProfile} SCALE</div>
@@ -599,8 +775,21 @@ export default function App() {
                   </div>
 
                   {/* Benchmark charts comparison */}
-                  <div className="glass-panel rounded-xl p-6 lg:col-span-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-4">Pipeline Execution Times (Milliseconds)</h3>
+                  <div className="glass-panel rounded-2xl p-6 lg:col-span-2 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-green-500/10 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-5">
+  <div>
+    <h3 className="text-sm font-bold text-white">
+      Pipeline Execution Time
+    </h3>
+    <p className="text-xs text-slate-400 mt-1">
+      CPU vs GPU benchmark comparison
+    </p>
+  </div>
+
+  <span className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-300 text-[10px] font-semibold uppercase">
+    Live
+  </span>
+</div>
                     <div className="h-72 w-full">
                       {benchmarkData.benchmark.cpu_time_ms > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
