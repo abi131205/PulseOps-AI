@@ -11,6 +11,13 @@ body {
   font-family: 'Outfit', 'Inter', sans-serif;
   overflow-x: hidden;
 }
+* {
+  transition: all 0.25s ease;
+}
+::selection {
+  background: #2979FF;
+  color: white;
+}
 
 /* Custom scrollbar styles */
 ::-webkit-scrollbar {
@@ -33,10 +40,11 @@ body {
 
 /* Glassmorphism utility classes */
 .glass-panel {
-  background: rgba(21, 28, 44, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(34, 45, 68, 0.5);
+  background: rgba(21, 28, 44, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(34, 45, 68, 0.6);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
 }
 
 .pulsing-indicator {
