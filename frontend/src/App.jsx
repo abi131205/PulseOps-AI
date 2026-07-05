@@ -306,65 +306,132 @@ export default function App() {
                 </div>
 
                 {/* Graph & Incident log */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Occupancy Trend chart */}
-                  <div className="glass-panel rounded-xl p-6 lg:col-span-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-4">Bed Utilization Time-Series Trend</h3>
-                    <div className="h-72 w-full">
-                      {occupancyChartData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={occupancyChartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#222D44" />
-                            <XAxis dataKey="time" stroke="#94A3B8" fontSize={10} />
-                            <YAxis stroke="#94A3B8" fontSize={10} />
-                            <Tooltip contentStyle={{ backgroundColor: '#151C2C', border: '1px solid #222D44' }} />
-                            <Legend fontSize={10} />
-                            <Line type="monotone" dataKey="ICU Beds Occupied" stroke="#2979FF" strokeWidth={2} dot={false} />
-                            <Line type="monotone" dataKey="ER Beds Occupied" stroke="#FF9100" strokeWidth={2} dot={false} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <div className="h-full flex items-center justify-center text-xs text-textMuted">Loading time-series data...</div>
-                      )}
-                    </div>
-                  </div>
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                  {/* Active Incident logs */}
-                  <div className="glass-panel rounded-xl p-6 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-4">Active Operational Incidents</h3>
-                      <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-                        {commandCenterData.active_incidents.length > 0 ? (
-                          commandCenterData.active_incidents.map((inc) => (
-                            <div key={inc.incident_id} className="border border-borderLight bg-slate-900/40 rounded-lg p-3 text-xs space-y-1">
-                              <div className="flex justify-between items-center">
-                                <span className="font-semibold text-white">{inc.incident_id}</span>
-                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                                  inc.severity === 'Critical' ? 'bg-accentRed/10 text-accentRed' :
-                                  inc.severity === 'High' ? 'bg-accentOrange/10 text-accentOrange' :
-                                  'bg-accentBlue/10 text-accentBlue'
-                                }`}>
-                                  {inc.severity}
-                                </span>
-                              </div>
-                              <div className="text-[11px] text-slate-300">
-                                {inc.incident_type} in <span className="font-medium text-white">{inc.department}</span>
-                              </div>
-                              <div className="text-[9px] text-textMuted">
-                                Requires: <span className="font-medium">{inc.equipment_required}</span>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-xs text-textMuted py-8 text-center">No active operational incidents logged.</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+  {/* Occupancy Trend Chart */}
+  <div className="glass-panel rounded-2xl p-6 lg:col-span-2 border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
 
+    <div className="flex items-center justify-between mb-5">
+      <div>
+        <h3 className="text-sm font-bold text-white">
+          Bed Utilization Trend
+        </h3>
+        <p className="text-xs text-slate-400 mt-1">
+          Real-time ICU & ER occupancy analysis
+        </p>
+      </div>
+
+      <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px] font-semibold uppercase tracking-wider">
+        Live
+      </span>
+    </div>
+
+    <div className="h-72 w-full">
+      {occupancyChartData.length > 0 ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={occupancyChartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#222D44" />
+            <XAxis dataKey="time" stroke="#94A3B8" fontSize={10} />
+            <YAxis stroke="#94A3B8" fontSize={10} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#151C2C",
+                border: "1px solid #222D44",
+              }}
+            />
+            <Legend fontSize={10} />
+            <Line
+              type="monotone"
+              dataKey="ICU Beds Occupied"
+              stroke="#38BDF8"
+              strokeWidth={3}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="ER Beds Occupied"
+              stroke="#FB923C"
+              strokeWidth={3}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="h-full flex items-center justify-center text-sm text-slate-400">
+          Loading time-series data...
+        </div>
+      )}
+    </div>
+  </div>
+
+  {/* Active Incident Logs */}
+  <div className="glass-panel rounded-2xl p-6 flex flex-col border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/80 shadow-xl hover:shadow-red-500/10 transition-all duration-300">
+
+    <div className="flex items-center justify-between mb-5">
+      <div>
+        <h3 className="text-sm font-bold text-white">
+          Active Incidents
+        </h3>
+        <p className="text-xs text-slate-400 mt-1">
+          Live operational alerts
+        </p>
+      </div>
+
+      <span className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-[10px] font-semibold uppercase">
+        Live
+      </span>
+    </div>
+
+    <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+      {commandCenterData.active_incidents.length > 0 ? (
+        commandCenterData.active_incidents.map((inc) => (
+          <div
+            key={inc.incident_id}
+            className="border border-slate-700 bg-slate-900/60 rounded-xl p-4 hover:border-cyan-500/40 hover:bg-slate-800/80 transition-all duration-300"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-semibold text-white">
+                {inc.incident_id}
+              </span>
+
+              <span
+                className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+                  inc.severity === "Critical"
+                    ? "bg-red-500/15 text-red-300 border border-red-500/30"
+                    : inc.severity === "High"
+                    ? "bg-orange-500/15 text-orange-300 border border-orange-500/30"
+                    : "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
+                }`}
+              >
+                {inc.severity}
+              </span>
+            </div>
+
+            <p className="text-sm text-slate-300">
+              {inc.incident_type} in{" "}
+              <span className="font-semibold text-white">
+                {inc.department}
+              </span>
+            </p>
+
+            <p className="text-xs text-slate-500 mt-2">
+              Requires:
+              <span className="font-medium text-slate-300">
+                {" "}
+                {inc.equipment_required}
+              </span>
+            </p>
+          </div>
+        ))
+      ) : (
+        <div className="text-sm text-slate-400 text-center py-10">
+          No active operational incidents logged.
+        </div>
+      )}
+    </div>
+  </div>
+
+</div>
             {/* 2. Operational Priorities View */}
             {activeTab === 'priorities' && (
               <div className="glass-panel rounded-xl p-6">
