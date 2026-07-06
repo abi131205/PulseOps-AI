@@ -622,6 +622,52 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                {/* Department Response Time Std Dev panel */}
+                <div className="glass-panel rounded-xl p-6 mt-6">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-800 mb-1">
+                    Incident Response Time Variability by Department
+                  </h3>
+                  <p className="text-[11px] text-textMuted mb-4">
+                    Standard deviation captures how unpredictable response times are per department — two departments can share the same average but differ sharply in consistency.
+                  </p>
+                  <div className="border border-borderLight rounded-lg overflow-hidden bg-white shadow-sm">
+                    <table className="w-full border-collapse text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-borderLight bg-slate-50/50 text-slate-600 font-semibold">
+                          <th className="p-4">Department</th>
+                          <th className="p-4">Avg Response Time (min)</th>
+                          <th className="p-4">Std Deviation (min)</th>
+                          <th className="p-4">Incident Count</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-borderLight text-slate-700">
+                        {benchmarkData?.data?.department_response_stats?.length > 0 ? (
+                          benchmarkData.data.department_response_stats.map((dept, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
+                              <td className="p-4 font-bold text-slate-900">{dept.department}</td>
+                              <td className="p-4">{dept.avg_response_time?.toFixed(2)}</td>
+                              <td className="p-4">
+                                <span className={`font-semibold ${
+                                  dept.response_time_std > 10 ? "text-accentRed" :
+                                  dept.response_time_std > 5 ? "text-accentOrange" :
+                                  "text-accentGreen"
+                                }`}>
+                                  {dept.response_time_std?.toFixed(2)}
+                                </span>
+                              </td>
+                              <td className="p-4">{dept.incident_count}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={4} className="p-4 text-center text-textMuted">No department response-time data available.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             )}
           </div>
