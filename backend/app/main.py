@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -10,6 +10,15 @@ app = FastAPI(
     description="Hospital Operations Decision Intelligence Platform API",
     version="1.0.0"
 )
+
+# Disable browser caching of static bundle files to prevent outdated assets loading
+@app.middleware("http")
+async def add_no_cache_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 # FIX (Bug #3): allow_origins=["*"] combined with allow_credentials=True is an
 # invalid/insecure combination (browsers will reject credentialed requests
@@ -33,7 +42,7 @@ app.add_middleware(
 )
 
 # Import pipeline and decision engine services
-from analytics.pipeline import load_data_source, run_performance_benchmark
+from analytics.pipeline import load_data_source, run_performance_benchmark, clear_data_cache
 from backend.app.services.decision_engine import compute_all_ops
 from backend.app.services.recommendation_engine import generate_operational_recommendations
 from backend.app.services.gemini import generate_recommendation_briefing
@@ -41,6 +50,7 @@ from backend.app.services.gemini import generate_recommendation_briefing
 # Placeholder route to verify API health
 @app.get("/api/health")
 async def health_check():
+    clear_data_cache()  # Force cache invalidation on environment resets/profile switches
     return {
         "status": "healthy",
         "dataset_profile": settings.DATASET_PROFILE,

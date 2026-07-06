@@ -77,3 +77,31 @@ cd frontend
 npm install
 npm run dev
 ```
+
+---
+
+## 🔒 Secure Developer Tunnelling (Ngrok)
+
+During local prototyping, evaluations, and hackathon judging, the platform can be exposed securely to the internet using **Ngrok**. 
+
+### 🛡️ The Importance of Tunnel Security
+Exposing local developer ports (e.g., port `8080`) to a public URL introduces significant security risks:
+1. **Unauthorized Access:** Anyone discovering the URL can query the system, view telemetry, and access endpoints.
+2. **API Key Exhaustion:** Bots or unauthorized users scraping the site can trigger repeated calls to the Google Gemini API, quickly depleting your key quotas.
+3. **Data Exposure:** Direct queries to your BigQuery schemas could be initiated by malicious actors.
+
+To prevent this, we enforce **Edge Basic Authentication** at the Ngrok tunnel layer. This blocks all traffic at Ngrok's cloud edge before it ever reaches your local network.
+
+### ⚙️ How to Start the Secure Tunnel
+Run the following command in your terminal to create a password-protected endpoint:
+
+```bash
+ngrok http 8080 --basic-auth "admin:pulseops2026"
+```
+
+### 🔑 Credentials for Access
+When accessing the public Ngrok link, the browser will display a standard HTTP basic login popup. Enter the following credentials:
+* **Username:** `admin`
+* **Password:** `pulseops2026`
+
+*(You can customize these values in the `--basic-auth` flag to rotate credentials or set strong passwords as needed).*

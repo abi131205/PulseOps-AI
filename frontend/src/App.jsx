@@ -25,7 +25,7 @@ import {
   Shuffle 
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = window.location.port === '5173' ? 'http://localhost:8080/api' : '/api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('command-center');

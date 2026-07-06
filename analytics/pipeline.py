@@ -17,8 +17,13 @@ except ImportError:
     print("[NVIDIA RAPIDS] CUDA not available. Running in Development (Pandas) mode.")
 
 # Paths setup
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATASETS_DIR = os.path.join(BASE_DIR, "datasets")
+# Simple In-Memory Cache to prevent repeated BigQuery calls
+_DATA_CACHE = {}
+
+def clear_data_cache():
+    global _DATA_CACHE
+    _DATA_CACHE.clear()
+    print("[Data Cache] In-memory data cache cleared.")
 
 def get_csv_path(table_name: str) -> str:
     return os.path.join(DATASETS_DIR, f"{table_name}.csv")
@@ -29,6 +34,10 @@ def load_data_source(table_name: str, use_gpu: bool = False):
     If GCP credentials and BigQuery dataset details are defined, we query BigQuery.
     Otherwise, we fall back to local synthetic CSV files.
     """
+    cache_key = f"{table_name}_gpu_{use_gpu}"
+    if cache_key in _DATA_CACHE:
+        return _DATA_CACHE[cache_key].copy()
+        
     csv_path = get_csv_path(table_name)
     
     # Check BigQuery credentials
@@ -39,31 +48,45 @@ def load_data_source(table_name: str, use_gpu: bool = False):
     has_credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS") is not None
     is_cloud_run = os.getenv("K_SERVICE") is not None
     
+    res = None
     if project_id and (has_credentials or is_cloud_run):
         try:
             from google.cloud import bigquery
-            from google.cloud import bigquery_storage
-            
             client = bigquery.Client(project=project_id)
-            bqstorage_client = bigquery_storage.BigQueryReadClient()
-            
             query = f"SELECT * FROM `{project_id}.{dataset_id}.{table_name}`"
             
-            # Use Arrow format for fast loading into pandas/cudf
-            df_arrow = client.query(query).to_arrow(bqstorage_client=bqstorage_client)
+            # Use high-performance gRPC Storage API only in Cloud Run where gRPC is allowed
+            if is_cloud_run:
+                try:
+                    from google.cloud import bigquery_storage
+                    bqstorage_client = bigquery_storage.BigQueryReadClient()
+                    df_arrow = client.query(query).to_arrow(bqstorage_client=bqstorage_client)
+                    if use_gpu and GPU_AVAILABLE:
+                        res = cudf.DataFrame.from_arrow(df_arrow)
+                    else:
+                        res = df_arrow.to_pandas()
+                except Exception as bqse:
+                    print(f"[BigQuery] gRPC Storage API failed: {bqse}. Falling back to REST...")
             
-            if use_gpu and GPU_AVAILABLE:
-                return cudf.DataFrame.from_arrow(df_arrow)
-            else:
-                return df_arrow.to_pandas()
+            if res is None:
+                # Stable HTTP REST query for local development networks
+                df = client.query(query).to_dataframe()
+                if use_gpu and GPU_AVAILABLE:
+                    res = cudf.DataFrame.from_pandas(df)
+                else:
+                    res = df
         except Exception as e:
-            print(f"[BigQuery] Failed to fetch {table_name} via Storage API: {e}. Falling back to CSV.")
+            print(f"[BigQuery] Failed to fetch {table_name}: {e}. Falling back to CSV.")
             
-    # Fallback to local CSV load
-    if use_gpu and GPU_AVAILABLE:
-        return cudf.read_csv(csv_path)
-    else:
-        return pd.read_csv(csv_path)
+    # Fallback to local CSV load if BigQuery failed or wasn't configured
+    if res is None:
+        if use_gpu and GPU_AVAILABLE:
+            res = cudf.read_csv(csv_path)
+        else:
+            res = pd.read_csv(csv_path)
+            
+    _DATA_CACHE[cache_key] = res
+    return res.copy()
 
 def process_cpu_metrics(telemetry, maintenance, occupancy, incidents):
     """Runs data processing using Pandas (CPU)"""

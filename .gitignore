@@ -35,3 +35,6 @@ Thumbs.db
 datasets/*.csv
 datasets/raw/*.csv
 datasets/processed/*.csv
+
+# GCP Credentials JSON keys
+*.json
