@@ -7,9 +7,9 @@ Unlike diagnostic or clinical AI tools, PulseOps AI operates strictly within the
 
 ---
 
-## 💡 Hackathon Submission Details (Challenge 2)
+## 💡 Hackathon Submission Details
 
-This project has been built to solve **Challenge 2: Create a data intelligence tool people would actually use, and show how acceleration helps them make a faster or better decision.**
+This project has been built to solve for Creating a data intelligence tool people would actually use, and show how acceleration helps them make a faster or better decision.**
 
 ### 1. Real-World User & Problem
 * **User:** Hospital Operations Directors, Medical Equipment Technicians, and ER Duty Managers.
@@ -222,7 +222,7 @@ To view the live prototype at your ngrok URL, enter these credentials:
 ## 📈 Technical Challenges Resolved & Lessons Learned
 
 During the engineering phase, we hit and resolved four critical production blockers:
-1. **GCP suspended billing blocker:** The Google Cloud organization policies suspended SA key generation and required ₹3,000 to enable new project billing. We bypassed this by utilizing a **Secure Ngrok Tunnel with Edge HTTP Basic Authentication** to expose the local prototype to judges securely without incurring costs.
+1. **GCP suspended billing blocker:** The Google Cloud organization policies suspended SA key generation and required prepayment, to enable new project billing. We bypassed this by utilizing a **Secure Ngrok Tunnel with Edge HTTP Basic Authentication** to expose the local prototype to judges securely without incurring costs.
 2. **BigQuery local storage gRPC timeouts:** Local ISP network firewalls caused Google's BigQuery Storage Read API (gRPC streams) to timeout, freezing the dashboard on first load. We resolved this by falling back to standard HTTP REST query APIs (`to_dataframe()`) with `db-dtypes` and implemented an **in-memory data cache** that loads subsequent updates instantly in `<10ms`.
 3. **Combinatorial row explosions:** Merging raw telemetry records (1M) with maintenance logs (20k) on a repeating `equipment_id` caused a massive memory crash. We resolved this by pre-aggregating the maintenance metrics down to a single row per `equipment_id` *before* the merge, keeping the join a clean, fast 1-to-many relationship.
 4. **React blank screen runtime crash:** If the backend benchmark query returned an empty object, the React UI crashed. We resolved this by implementing **optional chaining safety safeguards** across all React render structures, ensuring the UI degrades gracefully.
