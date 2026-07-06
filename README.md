@@ -75,7 +75,7 @@ All members have completed their focus objectives, resulting in a fully integrat
 * **Allocated Focus:** Built backend REST API endpoints; configured the multi-stage `Dockerfile`; adapted the deployment workflow (`deploy.yml`) to gracefully support secure Ngrok prototyping.
 * **Status:** **100% Completed**
 
-### 4. Krithika: UI Adjustments & QA Debugger
+### 4. Kritika: UI Adjustments & QA Debugger
 * **Allocated Focus:** Customized the user interface using a premium Dusty Rose (`#B36A70`) and Warm Taupe (`#A89F91`) color theme; implemented dynamic hover states and layout responsiveness; integrated optional chaining safety safeguards in React to prevent rendering crashes.
 * **Status:** **100% Completed**
 
