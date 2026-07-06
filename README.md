@@ -80,6 +80,90 @@ npm run dev
 
 ---
 
+## ⚡ NVIDIA RAPIDS GPU Acceleration & Benchmarking
+
+PulseOps AI features a hybrid data layer that dynamically detects hardware capabilities. On standard CPU environments, it runs optimized **Pandas** processing; on GPU-enabled environments, it utilizes **NVIDIA RAPIDS cuDF** to execute data aggregation, rolling occupancy ratios, and incident metrics in parallel directly on the GPU.
+
+### 📊 Benchmark Performance (1 Million Rows Scale)
+When scaling up to **1,000,000 telemetry rows**, execution time drops drastically on the GPU:
+
+![RAPIDS GPU Benchmark](docs/images/rapids_benchmark.png)
+
+* **CPU Execution (Pandas):** `440.03ms`
+* **GPU Execution (NVIDIA cuDF):** `53.44ms`
+* **Performance Gain:** **`8.2x` Speedup** (nearly 10x faster)
+
+---
+
+### 💻 Running Locally with an NVIDIA GPU (For Teammates)
+
+If your teammates have a machine with an **NVIDIA Graphics Card**, they can run the GPU-accelerated backend locally by following these steps:
+
+#### 1. Setup Windows Subsystem for Linux (WSL2)
+NVIDIA RAPIDS requires Linux or Windows WSL2. Open PowerShell as Administrator and install WSL2:
+```bash
+wsl --install -d Ubuntu
+```
+
+#### 2. Install NVIDIA CUDA Drivers for WSL
+Ensure the host Windows machine has the latest NVIDIA drivers with WSL support installed:
+[Download NVIDIA CUDA WSL Drivers](https://developer.nvidia.com/cuda/wsl)
+
+#### 3. Install Miniconda in WSL2
+Open your Ubuntu shell and install conda:
+```bash
+mkdir -p ~/miniconda3
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+rm -rf ~/miniconda3/miniconda.sh
+~/miniconda3/bin/conda init bash
+```
+Restart your terminal.
+
+#### 4. Initialize Conda Environment with cuDF
+Create a RAPIDS conda environment with `cudf=24.04` and `python=3.11`:
+```bash
+conda create -n rapids-24.04 -c rapidsai -c conda-forge -c nvidia cudf=24.04 python=3.11
+conda activate rapids-24.04
+```
+
+#### 5. Run Backend Server in WSL2
+Go to your project workspace directory inside WSL2:
+```bash
+cd /mnt/e/PulseOps\ AI/backend
+pip install -r requirements.txt
+python -m uvicorn app.main:app --port 8080 --host 0.0.0.0
+```
+The application will automatically detect your NVIDIA GPU, boot in `cuDF Mode`, and output live GPU performance metrics on your dashboard!
+
+---
+
+### ☁️ Running on Cloud GPU (Google Colab)
+
+If you or your teammates **do not** have a local NVIDIA GPU, you can still test and verify the RAPIDS speedup in the cloud using **Google Colab** (which provides free cloud NVIDIA GPUs):
+
+1. Upload the `analytics/` and `datasets/` folders to your **Google Drive** inside a folder named `PulseOps_AI`.
+2. Open a new notebook on [Google Colab](https://colab.research.google.com/) and change the runtime type to **T4 GPU** (Runtime -> Change runtime type -> T4 GPU).
+3. Run the following code in a cell to mount your Drive and run the benchmark:
+   ```python
+   from google.colab import drive
+   import os, sys
+   drive.mount('/content/drive')
+   os.chdir('/content/drive/MyDrive/PulseOps_AI')
+   sys.path.insert(0, '/content/drive/MyDrive/PulseOps_AI')
+   
+   # Set scale to LARGE
+   os.environ["DATASET_PROFILE"] = "LARGE"
+   !python datasets/generate_data.py
+   
+   # Run benchmark
+   from analytics.pipeline import clear_data_cache, run_performance_benchmark
+   clear_data_cache()
+   print(run_performance_benchmark()["benchmark"])
+   ```
+
+---
+
 ## 🔒 Secure Developer Tunnelling (Ngrok)
 
 During local prototyping, evaluations, and hackathon judging, the platform can be exposed securely to the internet using **Ngrok**. 

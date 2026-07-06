@@ -577,7 +577,7 @@ export default function App() {
                     <div className="border-t border-borderLight/50 pt-4">
                       <span className="text-[10px] text-textMuted uppercase font-semibold">GPU Processing Mode</span>
                       <div className="flex items-center gap-2 mt-2">
-                        {benchmarkData.benchmark.gpu_native ? (
+                        {benchmarkData?.benchmark?.gpu_native ? (
                           <span className="px-2.5 py-0.5 bg-accentGreen/10 text-accentGreen rounded text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                             <CheckCircle2 className="h-3.5 w-3.5" />
                             NATIVE GPU (cuDF)
@@ -594,7 +594,7 @@ export default function App() {
                     <div className="border-t border-borderLight/50 pt-4">
                       <span className="text-[10px] text-textMuted uppercase font-semibold">Speed Improvement</span>
                       <div className="text-4xl font-extrabold text-accentGreen mt-1">
-                        {typeof benchmarkData.benchmark.speedup === 'number' ? `${benchmarkData.benchmark.speedup}x` : 'not measured'}
+                        {typeof benchmarkData?.benchmark?.speedup === 'number' ? `${benchmarkData.benchmark.speedup}x` : 'not measured'}
                       </div>
                       <div className="text-[10px] text-textMuted mt-1">GPU Accelerated Processing Gain</div>
                     </div>
@@ -604,7 +604,7 @@ export default function App() {
                   <div className="glass-panel rounded-xl p-6 lg:col-span-2">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-800 mb-4">Pipeline Execution Times (Milliseconds)</h3>
                     <div className="h-72 w-full">
-                      {benchmarkData.benchmark.cpu_time_ms > 0 ? (
+                      {benchmarkData?.benchmark?.cpu_time_ms > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={benchmarkChartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#E5DCD3" />

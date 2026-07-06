@@ -17,6 +17,9 @@ except ImportError:
     print("[NVIDIA RAPIDS] CUDA not available. Running in Development (Pandas) mode.")
 
 # Paths setup
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATASETS_DIR = os.path.join(BASE_DIR, "datasets")
+
 # Simple In-Memory Cache to prevent repeated BigQuery calls
 _DATA_CACHE = {}
 
