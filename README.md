@@ -207,7 +207,7 @@ If your teammates do not have a local NVIDIA GPU (e.g., they use Macs or Intel i
 
 Exposing local ports to public URLs during hackathon reviews introduces unauthorized access risks and can deplete Google Gemini API limits due to scrapers. We secure the prototype by enforcing **Edge Basic Authentication** at the Ngrok tunnel layer.
 
-### Start the Secure Tunnel:
+### Start the Secure Tunnel(Note use the Terminal of the project):
 ```bash
 ngrok http 8080 --basic-auth "admin:pulseops2026"
 ```
