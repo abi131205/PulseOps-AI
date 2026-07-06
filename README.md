@@ -124,11 +124,60 @@ PulseOps AI dynamically detects GPU availability. If a CUDA device is present, i
 * **GPU Execution (NVIDIA cuDF):** `53.44ms`
 * **Speedup:** **`8.2x` Speedup**
 
-### 📊 How to Run the GPU Acceleration Benchmark
+### 💻 Option 1: For Windows Users WITH an NVIDIA GPU (GTX / RTX Local Setup)
+If you or your teammates have a Windows laptop/desktop with a dedicated NVIDIA graphics card (e.g., GTX 10/16-series, RTX 20/30/40/50-series, or RTX Laptop GPUs), you can run the GPU-accelerated backend locally. 
 
-Since NVIDIA RAPIDS cuDF does not run natively on bare-metal Windows, the local server runs in **CPU Development Mode** using optimized Pandas (loading from BigQuery and caching results locally).
+Because NVIDIA RAPIDS cuDF does not support Windows natively, Windows users run it using **WSL2 (Windows Subsystem for Linux)**—a built-in Windows feature that runs a lightweight Linux kernel directly inside Windows without modifying your operating system:
 
-To test and verify the **NVIDIA RAPIDS GPU Speedups** (comparing CPU Pandas vs GPU cuDF), use **Google Colab** which provides free cloud NVIDIA GPUs with RAPIDS pre-installed:
+#### 1. Enable WSL2 in Windows
+Open PowerShell as Administrator and run:
+```powershell
+wsl --install -d Ubuntu
+```
+*(If prompted, restart your computer to finalize the installation).*
+
+#### 2. Install NVIDIA WSL Drivers
+Ensure your host Windows system has the latest GPU drivers installed:
+👉 [Download NVIDIA WSL CUDA Drivers](https://developer.nvidia.com/cuda/wsl)
+
+#### 3. Install Miniconda inside WSL2
+Open your newly installed **Ubuntu** app from your Windows Start Menu, and run this to install Conda:
+```bash
+mkdir -p ~/miniconda3
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+rm -rf ~/miniconda3/miniconda.sh
+~/miniconda3/bin/conda init bash
+```
+Close and reopen your WSL terminal.
+
+#### 4. Create the RAPIDS Conda Environment
+Install NVIDIA cuDF inside your Conda environment:
+```bash
+conda create -n rapids-24.04 -c rapidsai -c conda-forge -c nvidia cudf=24.04 python=3.11
+conda activate rapids-24.04
+```
+
+#### 5. Verify Windows accesses your GTX/RTX GPU
+Run:
+```bash
+nvidia-smi
+```
+*(This will print your graphics card model, e.g., RTX 4060, confirming Windows GPU access).*
+
+#### 6. Launch the Server inside WSL2
+Navigate to your project directory (WSL mounts Windows drives under `/mnt/` automatically) and start the backend:
+```bash
+cd /mnt/e/PulseOps\ AI/backend
+pip install -r requirements.txt
+python -m uvicorn app.main:app --port 8080 --host 0.0.0.0
+```
+Your local server will immediately boot in **Native GPU (cuDF) mode** and display live GPU acceleration metrics on your browser dashboard!
+
+---
+
+### ☁️ Option 2: For Users WITHOUT an NVIDIA GPU (Cloud Google Colab Setup)
+If your teammates do not have a local NVIDIA GPU (e.g., they use Macs or Intel integrated graphics laptops), they can still easily test and verify the RAPIDS speedup in the cloud on a free Google-hosted GPU:
 
 1. Upload the `analytics/` and `datasets/` folders from this repository to your **Google Drive** inside a folder named **`PulseOps_AI`**.
 2. Open [Google Colab](https://colab.research.google.com/) and create a new notebook.
